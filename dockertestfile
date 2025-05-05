@@ -1,0 +1,62 @@
+FROM amazoncorretto:17
+LABEL author = "aravindh"
+LABEL project = "docker-learn"
+RUN mkdir /spc && chown nobody /spc
+USER nobody
+WORKDIR /spc
+ARG Download_url="https://khajareferenceapps.s3.ap-south-1.amazonaws.com/spring-petclinic-3.2.0-SNAPSHOT.jar"
+RUN curl -O ${Download_url}
+EXPOSE 8080
+CMD ["java", "-jar", "spring-petclinic-3.2.0-SNAPSHOT.jar"]
+
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+LABEL author="aravindh"
+LABEL project=".netsdk8.0"
+RUN apt update && apt install unzip
+RUN adduser nop
+RUN mkdir app && chown nop /app
+USER nop
+WORKDIR /app
+ARG Download_url="https://github.com/nopSolutions/nopCommerce/releases/download/release-4.70.4/nopCommerce_4.70.4_NoSource_linux_x64.zip"
+RUN wget ${Download_url}
+RUN unzip nopCommerce_4.70.4_NoSource_linux_x64.zip
+RUN mkdir bin && mkdir logs
+EXPOSE 5000
+CMD [ "dotnet","Nop.Web.dll","--urls","http://0.0.0.0:5000" ]
+
+
+RUN nginx:1.27.0
+LABEL author="aravindh"
+LABEL project=".netsdk8.0"
+RUN apt update && apt install unzip
+RUN mkdir app && cd app
+RUN curl -O https://www.free-css.com/assets/files/free-css-templates/download/page295/applight.zip
+RUN unzip applight.zip && cp -r Applight/ /usr/share/nginx/html/mapp
+
+
+
+FROM maven:3.9.7-eclipse-temurin-17 As build
+RUN git clone https://github.com/spring-projects/spring-petclinic.git
+RUN cd spring-petclinic && mvn clean package
+
+FROM amazoncorretto:17
+RUN mkdir /spc && chown nobody /spc
+USER nobody
+WORKDIR /spc
+COPY --from=build --chown=nobody /spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar /spc/spring-petclinic.jar
+CMD [ "java","-jar","spring-petclinic.jar" ]
+
+
+
+
+FROM amazoncorretto:17
+LABEL author = "Aravindh"
+RUN mkdir /spc && chown nobody /spc
+USER nobody
+CMD ["yum","update"],
+CMD ["yum","install","git"]
+WORKDIR /spc
+ARG download_url ="https://github.com/Aravindh-29/spring-pet-app.git"       RUN git clone ${download_url}
+EXPOSE 8080
+CMD ["java","-jar","spring-petclinic-3.4.0-SNAPSHOT.jar"]
